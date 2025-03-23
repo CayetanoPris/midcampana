@@ -18,7 +18,7 @@ public class ReporteServiceListenerImpl {
 	@Autowired
 	private GeneraReporte generaReporte;
 	
-	@RabbitListener(queues = "solitudesReportes")
+	//@RabbitListener(queues = "solitudesReportes")
     public void receiveReporte(List<CampaniaDTO> listCampaniaDTO) {
         try {
         	for (CampaniaDTO campaniaDTO : listCampaniaDTO) {

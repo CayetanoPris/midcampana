@@ -4,7 +4,6 @@ package com.admin.controller;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.concurrent.CompletableFuture;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -32,18 +31,19 @@ public class CampaniaController {
 	private SolicitudReporteService solicitudReporteService;
 
 	@PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-	public CompletableFuture<String> solicitudReporteCampania(@RequestParam String fecha) {
+	public String solicitudReporteCampania(@RequestParam String fecha) {
 		log.info("Solicitud para reporte-->>");
 		boolean isValidFecha = validarFecha(fecha);
 		if (isValidFecha) {
 			ContadorDTO contadorRegistro = consultaCampania.ejecutaSolicitud(fecha);
 			if (contadorRegistro.getContadorRegistros()>0) {
-				return solicitudReporteService.solReporteCampaniaPorFecha(getRequest(fecha, contadorRegistro.getContadorRegistros()));
+				solicitudReporteService.solReporteCampaniaPorFecha(getRequest(fecha, contadorRegistro.getContadorRegistros()));
+				return "Reporte Generado";
 			}else {
-				return CompletableFuture.completedFuture("No hay datos para reporte");
+				return "No hay datos para reporte";
 			}
 		}else {
-			return CompletableFuture.completedFuture("Fecha no valida");
+			return "Fecha no valida";
 		}
 	}
 	
