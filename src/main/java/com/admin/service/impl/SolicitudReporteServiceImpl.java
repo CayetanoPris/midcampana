@@ -1,9 +1,11 @@
 package com.admin.service.impl;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import com.admin.dto.CampaniaDTO;
@@ -39,6 +41,23 @@ public class SolicitudReporteServiceImpl implements SolicitudReporteService {
 		}
 		isValid = true;
 		return isValid;
+	}
+
+	@Override
+	@Async
+	public CompletableFuture<String> solReporteCampaniaPorFecha(ReporteCampaniaDTO reporteCampaniaDTO) {
+		return CompletableFuture.supplyAsync(() -> {
+			List<CampaniaDTO> list = null;
+			int limiteP = 50;
+			int paginas = (reporteCampaniaDTO.getTotalRegistrosEnBD() + limiteP - 1) / limiteP;
+			log.info("Paginas en campania" + paginas);
+			for (int i = 0; i <= paginas; i++) {
+				int offset = (i-1) * limiteP;
+				list = consultaCampania.ejecutaSolicitudPaginado(reporteCampaniaDTO.getFecha(), limiteP, offset);
+				rabbitTemplate.convertAndSend("solitudesReportes", list);
+			}
+            return "Reporte Generado";
+        });
 	}
 
 }

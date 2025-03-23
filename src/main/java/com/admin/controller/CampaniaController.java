@@ -1,7 +1,10 @@
 package com.admin.controller;
 
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.concurrent.CompletableFuture;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -29,24 +32,38 @@ public class CampaniaController {
 	private SolicitudReporteService solicitudReporteService;
 
 	@PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-	public String solicitudReporteCampania(@RequestParam String fecha) {
+	public CompletableFuture<String> solicitudReporteCampania(@RequestParam String fecha) {
 		log.info("Solicitud para reporte-->>");
-		String sucess = "No hay data para reporte de acuerdo a la fecha introducida";
-		try {
-			ContadorDTO valid = consultaCampania.ejecutaSolicitud(fecha);
-			if (valid.getContadorRegistros()>0) {
-				ReporteCampaniaDTO reporte = new ReporteCampaniaDTO();
-				reporte.setFecha(fecha);
-				reporte.setTotalRegistrosEnBD(valid.getContadorRegistros());
-				reporte.setFechaSolicitud(new Date());
-				solicitudReporteService.solicitudReporteCampaniaPorFecha(reporte);
-				sucess = "Reporte generado";
+		boolean isValidFecha = validarFecha(fecha);
+		if (isValidFecha) {
+			ContadorDTO contadorRegistro = consultaCampania.ejecutaSolicitud(fecha);
+			if (contadorRegistro.getContadorRegistros()>0) {
+				return solicitudReporteService.solReporteCampaniaPorFecha(getRequest(fecha, contadorRegistro.getContadorRegistros()));
+			}else {
+				return CompletableFuture.completedFuture("No hay datos para reporte");
 			}
-			return sucess;
-		} catch (Exception e) {
-			  return "Error: Formato de fecha inválido. Use yyyy-MM-dd";
+		}else {
+			return CompletableFuture.completedFuture("Fecha no valida");
 		}
-		
 	}
+	
+	private ReporteCampaniaDTO getRequest(String fecha,Integer contadorRegistros) {
+		ReporteCampaniaDTO reporte = new ReporteCampaniaDTO();
+		reporte.setFecha(fecha);
+		reporte.setTotalRegistrosEnBD(contadorRegistros);
+		reporte.setFechaSolicitud(new Date());
+		return reporte;
+	}
+	
+	public static boolean validarFecha(String fecha) {
+        SimpleDateFormat formato = new SimpleDateFormat("yyyy/MM/dd");
+        formato.setLenient(false); // Para que no acepte fechas no válidas
+        try {
+            Date fechaValida = formato.parse(fecha);
+            return true;
+        } catch (ParseException e) {
+            return false;
+        }
+    }
 	
 }
