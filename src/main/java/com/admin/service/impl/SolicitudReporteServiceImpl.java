@@ -1,5 +1,6 @@
 package com.admin.service.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -32,6 +33,7 @@ public class SolicitudReporteServiceImpl implements SolicitudReporteService {
 			int paginas = (reporteCampaniaDTO.getTotalRegistrosEnBD() + limiteP - 1) / limiteP;
 			log.info("Paginas en campania" + paginas);
 			for (int i = 0; i <= paginas; i++) {
+				list = new ArrayList<>();
 				int offset = (i-1) * limiteP;
 				list = consultaCampania.ejecutaSolicitudPaginado(reporteCampaniaDTO.getFecha(), limiteP, offset);
 				rabbitTemplate.convertAndSend("solitudesReportes", list);
