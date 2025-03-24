@@ -40,12 +40,12 @@ public class CampaniaController {
 			ContadorDTO contadorRegistro = consultaCampania.ejecutaSolicitud(fecha);
 			if (contadorRegistro.getContadorRegistros()>0) {
 				solicitudReporteService.solReporteCampaniaPorFecha(getRequest(fecha, contadorRegistro.getContadorRegistros()));
-				return new ResponseEntity<String>("Reporte Generado", HttpStatus.OK);
+				return new ResponseEntity<>("Reporte Generado", HttpStatus.OK);
 			}else {
-				return new ResponseEntity<String>("Sin datos para procesar", HttpStatus.NOT_FOUND);
+				return new ResponseEntity<>("Sin datos para procesar", HttpStatus.NOT_FOUND);
 			}
 		}else {
-			return new ResponseEntity<String>("Fecha no valida", HttpStatus.BAD_REQUEST);
+			return new ResponseEntity<>("Fecha no valida", HttpStatus.BAD_REQUEST);
 		}
 	}
 	
