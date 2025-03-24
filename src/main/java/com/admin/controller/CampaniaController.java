@@ -6,7 +6,9 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -31,19 +33,19 @@ public class CampaniaController {
 	private SolicitudReporteService solicitudReporteService;
 
 	@PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-	public String solicitudReporteCampania(@RequestParam String fecha) {
+	public ResponseEntity<String> solicitudReporteCampania(@RequestParam String fecha) {
 		log.info("Solicitud para reporte-->>");
 		boolean isValidFecha = validarFecha(fecha);
 		if (isValidFecha) {
 			ContadorDTO contadorRegistro = consultaCampania.ejecutaSolicitud(fecha);
 			if (contadorRegistro.getContadorRegistros()>0) {
 				solicitudReporteService.solReporteCampaniaPorFecha(getRequest(fecha, contadorRegistro.getContadorRegistros()));
-				return "Reporte Generado";
+				return new ResponseEntity<String>("Reporte Generado", HttpStatus.OK);
 			}else {
-				return "No hay datos para reporte";
+				return new ResponseEntity<String>("Sin datos para procesar", HttpStatus.NOT_FOUND);
 			}
 		}else {
-			return "Fecha no valida";
+			return new ResponseEntity<String>("Fecha no valida", HttpStatus.BAD_REQUEST);
 		}
 	}
 	
